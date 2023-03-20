@@ -1,4 +1,4 @@
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -27,8 +27,7 @@ public class c2_TransformingSequence extends TransformingSequenceBase {
     @Test
     public void transforming_sequence() {
         Flux<Integer> numbersFlux = numerical_service()
-                //todo change only this line
-                ;
+                .map(n -> n + 1);
 
         //StepVerifier is used for testing purposes
         //ignore it for now, or explore it independently
@@ -48,12 +47,21 @@ public class c2_TransformingSequence extends TransformingSequenceBase {
         Flux<Integer> numbersFlux = numerical_service_2();
 
         //todo: do your changes here
-        Flux<String> resultSequence = null;
+        Flux<String> resultSequence = numbersFlux
+                .map(n -> {
+                    if (n > 0) {
+                        return ">";
+                    } else if (n == 0) {
+                        return "=";
+                    } else {
+                        return "<";
+                    }
+                });
 
         //don't change code below
         StepVerifier.create(resultSequence)
-                    .expectNext(">", "<", "=", ">", ">")
-                    .verifyComplete();
+                .expectNext(">", "<", "=", ">", ">")
+                .verifyComplete();
     }
 
     /**
