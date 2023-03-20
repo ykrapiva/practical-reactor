@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -105,7 +104,8 @@ public class c1_Introduction extends IntroductionBase {
     public void fortune_top_five() {
         Flux<String> serviceResult = fortuneTop5();
 
-        List<String> results = emptyList(); //todo: change this line only
+        List<String> results = serviceResult.collectList().block();
+//        List<String> results = Mono.from(serviceResult.buffer()).block();
 
         assertEquals(Arrays.asList("Walmart", "Amazon", "Apple", "CVS Health", "UnitedHealth Group"), results);
         assertTrue(fortuneTop5ServiceIsCalled.get());
