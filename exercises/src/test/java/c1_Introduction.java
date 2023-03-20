@@ -16,15 +16,15 @@ import static org.junit.jupiter.api.Assertions.*;
  * This chapter will introduce you to the basics of Reactor.
  * You will learn how to retrieve result from Mono and Flux
  * in different ways.
- *
+ * <p>
  * Read first:
- *
+ * <p>
  * https://projectreactor.io/docs/core/release/reference/#intro-reactive
  * https://projectreactor.io/docs/core/release/reference/#reactive.subscribe
  * https://projectreactor.io/docs/core/release/reference/#_subscribe_method_examples
- *
+ * <p>
  * Useful documentation:
- *
+ * <p>
  * https://projectreactor.io/docs/core/release/reference/#which-operator
  * https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html
  * https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html
@@ -82,7 +82,7 @@ public class c1_Introduction extends IntroductionBase {
     /**
      * Many services return more than one result and best services supports streaming!
      * It's time to introduce Flux, an Asynchronous Sequence of 0-N Items.
-     *
+     * <p>
      * Service we are calling returns multiple items, but we are interested only in the first one.
      * Retrieve first item from this Flux by blocking indefinitely until a first item is received.
      */
@@ -130,10 +130,9 @@ public class c1_Introduction extends IntroductionBase {
 
         serviceResult
                 .doOnNext(companyList::add)
-        //todo: add an operator here, don't use any blocking operator!
-        ;
+                .subscribe();
 
-        Thread.sleep(1000); //bonus: can you explain why this line is needed?
+        //Thread.sleep(1000); //bonus: can you explain why this line is needed?
 
         assertEquals(Arrays.asList("Walmart", "Amazon", "Apple", "CVS Health", "UnitedHealth Group"), companyList);
     }
@@ -154,8 +153,12 @@ public class c1_Introduction extends IntroductionBase {
         CopyOnWriteArrayList<String> companyList = new CopyOnWriteArrayList<>();
 
         fortuneTop5()
-        //todo: change this line only
-        ;
+                .doOnNext(companyList::add)
+//                .onErrorContinue((throwable, o) -> {
+//
+//                })
+                .doOnComplete(() -> serviceCallCompleted.set(true))
+                .subscribe();
 
         Thread.sleep(1000);
 
