@@ -340,9 +340,16 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
 
     //todo: implement this method based on instructions
     public Mono<String> chooseSource() {
-        sourceA(); //<- choose if sourceRef == "A"
-        sourceB(); //<- choose if sourceRef == "B"
-        return Mono.empty(); //otherwise, return empty
+        return Mono.defer(() -> {
+            switch (sourceRef.get()) {
+                case "A":
+                    return sourceA();
+                case "B":
+                    return sourceB();
+                default:
+                    return Mono.empty();
+            }
+        });
     }
 
     @Test
