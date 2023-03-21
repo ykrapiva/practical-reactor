@@ -317,9 +317,9 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
     @Test
     public void car_factory() {
         //todo: feel free to change code as you need
-        Flux<Car> producedCars = null;
-        carChassisProducer();
-        carEngineProducer();
+        Flux<Chassis> chassisFlux = carChassisProducer();
+        Flux<Engine> engineFlux = carEngineProducer();
+        Flux<Car> producedCars = chassisFlux.zipWith(engineFlux, Car::new);
 
         //don't change below this line
         StepVerifier.create(producedCars)
