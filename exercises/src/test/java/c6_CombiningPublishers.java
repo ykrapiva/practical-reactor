@@ -256,9 +256,10 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
     @Test
     public void one_to_n() {
         //todo: feel free to change code as you need
-        Flux<String> fileLines = null;
-        openFile();
-        readFile();
+        Mono<Void> openMono = openFile();
+        Flux<String> readFlux = readFile();
+        Flux<String> fileLines = Mono.when(openMono)
+                .thenMany(readFlux);
 
         StepVerifier.create(fileLines)
                 .expectNext("0x1", "0x2", "0x3")
