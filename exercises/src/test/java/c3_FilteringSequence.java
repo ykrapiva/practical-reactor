@@ -6,13 +6,13 @@ import reactor.test.StepVerifier;
 /**
  * Sequence may produce many elements, but we are not always interested in all of them. In this chapter we will learn
  * how to filter elements from a sequence.
- *
+ * <p>
  * Read first:
- *
+ * <p>
  * https://projectreactor.io/docs/core/release/reference/#which.filtering
- *
+ * <p>
  * Useful documentation:
- *
+ * <p>
  * https://projectreactor.io/docs/core/release/reference/#which-operator
  * https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html
  * https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html
@@ -30,13 +30,13 @@ public class c3_FilteringSequence extends FilteringSequenceBase {
                 .filter(s -> s.length() <= 4);
 
         StepVerifier.create(shortListed)
-                    .expectNext("Emma", "Ava", "Mia", "Luna", "Ella")
-                    .verifyComplete();
+                .expectNext("Emma", "Ava", "Mia", "Luna", "Ella")
+                .verifyComplete();
     }
 
     /**
      * `mashed_data_service()` returns sequence of generic objects.
-     *  Without using `filter()` operator, collect only objects that are instance of `String`
+     * Without using `filter()` operator, collect only objects that are instance of `String`
      */
     @Test
     public void needle_in_a_haystack() {
@@ -57,14 +57,14 @@ public class c3_FilteringSequence extends FilteringSequenceBase {
                 .distinct();
 
         StepVerifier.create(items)
-                    .expectNext("1", "2", "3", "4", "5")
-                    .verifyComplete();
+                .expectNext("1", "2", "3", "4", "5")
+                .verifyComplete();
     }
 
     /**
      * This service returns many elements, but you are only interested in the first one.
      * Also, service is very fragile, if you pull more than needed, you may brake it.
-     *
+     * <p>
      * This time no blocking. Use only one operator.
      */
     @Test
@@ -88,8 +88,8 @@ public class c3_FilteringSequence extends FilteringSequenceBase {
                 .take(100);
 
         StepVerifier.create(numbers)
-                    .expectNextCount(100)
-                    .verifyComplete();
+                .expectNextCount(100)
+                .verifyComplete();
     }
 
     /**
@@ -101,9 +101,9 @@ public class c3_FilteringSequence extends FilteringSequenceBase {
                 .takeLast(100);
 
         StepVerifier.create(numbers)
-                    .expectNextMatches(i -> i >= 200)
-                    .expectNextCount(99)
-                    .verifyComplete();
+                .expectNextMatches(i -> i >= 200)
+                .expectNextCount(99)
+                .verifyComplete();
     }
 
     /**
@@ -112,12 +112,12 @@ public class c3_FilteringSequence extends FilteringSequenceBase {
     @Test
     public void golden_middle() {
         Flux<Integer> numbers = number_service()
-                //todo: do your changes here
-                ;
+                .skip(100)
+                .take(100);
 
         StepVerifier.create(numbers)
-                    .expectNextMatches(i -> i >= 100)
-                    .expectNextCount(99)
-                    .verifyComplete();
+                .expectNextMatches(i -> i >= 100)
+                .expectNextCount(99)
+                .verifyComplete();
     }
 }
