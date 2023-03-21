@@ -121,13 +121,12 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void task_executor_again() {
-        //todo: feel free to change code as you need
-        Flux<Void> tasks = null;
-        taskExecutor();
+        Flux<Mono<Void>> monoFlux = taskExecutor();
+        Flux<Void> tasks = monoFlux.concatMap(Function.identity());
 
         //don't change below this line
         StepVerifier.create(tasks)
-                    .verifyComplete();
+                .verifyComplete();
 
         Assertions.assertEquals(taskCounter.get(), 10);
     }
@@ -139,15 +138,15 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void need_for_speed() {
-        //todo: feel free to change code as you need
-        Flux<String> stonks = null;
-        getStocksGrpc();
-        getStocksRest();
+        Flux<String> stocksGrpc = getStocksGrpc();
+        Flux<String> stocksRest = getStocksRest();
+
+        Flux<String> stonks = Flux.firstWithValue(stocksGrpc, stocksRest);
 
         //don't change below this line
         StepVerifier.create(stonks)
-                    .expectNextCount(5)
-                    .verifyComplete();
+                .expectNextCount(5)
+                .verifyComplete();
     }
 
     /**
@@ -157,15 +156,14 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void plan_b() {
-        //todo: feel free to change code as you need
-        Flux<String> stonks = null;
-        getStocksLocalCache();
-        getStocksRest();
+        Flux<String> stocksLocalCache = getStocksLocalCache();
+        Flux<String> stocksRest = getStocksRest();
+        Flux<String> stonks = stocksLocalCache.switchIfEmpty(stocksRest);
 
         //don't change below this line
         StepVerifier.create(stonks)
-                    .expectNextCount(6)
-                    .verifyComplete();
+                .expectNextCount(6)
+                .verifyComplete();
 
         Assertions.assertTrue(localCacheCalled.get());
     }
