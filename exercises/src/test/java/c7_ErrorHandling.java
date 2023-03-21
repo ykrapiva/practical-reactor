@@ -56,9 +56,7 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
     @Test
     public void potato_potato() {
         Mono<String> currentUser = getCurrentUser()
-                //todo: change this line only
-                //use SecurityException
-                ;
+                .onErrorMap(SecurityException::new);
 
         StepVerifier.create(currentUser)
                 .expectErrorMatches(e -> e instanceof SecurityException &&
