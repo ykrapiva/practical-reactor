@@ -141,9 +141,14 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
     @Test
     public void billion_dollar_mistake() {
         Flux<String> content = getFilesContent()
+                .flatMap(fileContent -> fileContent
+                        .onErrorResume(th -> Mono.empty()));
+
+        content = getFilesContent()
                 .flatMap(Function.identity())
-                //todo: change this line only
-                ;
+                .onErrorContinue((throwable, o) -> {
+                    System.out.println("Failed: " + o);
+                });
 
         StepVerifier.create(content)
                 .expectNext("file1.txt content", "file3.txt content")
