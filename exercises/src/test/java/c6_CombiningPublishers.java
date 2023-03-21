@@ -1,14 +1,17 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.reactivestreams.Publisher;
 import reactor.blockhound.BlockHound;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Signal;
 import reactor.test.StepVerifier;
 
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -174,16 +177,25 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void mail_box_switcher() {
-        //todo: feel free to change code as you need
-        Flux<Message> myMail = null;
-        mailBoxPrimary();
-        mailBoxSecondary();
+        Flux<Message> mailBoxPrimary = mailBoxPrimary();
+        Flux<Message> mailBoxSecondary = mailBoxSecondary();
+        Flux<Message> myMail = mailBoxPrimary.switchOnFirst(new BiFunction<Signal<? extends Message>, Flux<Message>, Publisher<? extends Message>>() {
+            @Override
+            public Publisher<? extends Message> apply(Signal<? extends Message> signal, Flux<Message> messageFlux) {
+                Message message = signal.get();
+                if (message.metaData.equals("spam")) {
+                    return mailBoxSecondary;
+                } else {
+                    return messageFlux;
+                }
+            }
+        });
 
         //don't change below this line
         StepVerifier.create(myMail)
-                    .expectNextMatches(m -> !m.metaData.equals("spam"))
-                    .expectNextMatches(m -> !m.metaData.equals("spam"))
-                    .verifyComplete();
+                .expectNextMatches(m -> !m.metaData.equals("spam"))
+                .expectNextMatches(m -> !m.metaData.equals("spam"))
+                .verifyComplete();
 
         Assertions.assertEquals(1, consumedSpamCounter.get());
     }
