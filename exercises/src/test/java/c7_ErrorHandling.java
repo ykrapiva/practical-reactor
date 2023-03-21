@@ -102,8 +102,9 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
     @Test
     public void error_reporter() {
         //todo: feel free to change code as you need
-        Flux<String> messages = messageNode();
-        errorReportService(null);
+        Flux<String> messages = messageNode()
+                .onErrorResume(throwable -> errorReportService(throwable)
+                        .then(Mono.error(throwable)));
 
         //don't change below this line
         StepVerifier.create(messages)
@@ -121,8 +122,10 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
     @Test
     public void unit_of_work() {
         Flux<Task> taskFlux = taskQueue()
-                //todo: do your changes here
-                ;
+                .flatMap(task -> task.execute()
+                        .then(task.commit())
+                        .onErrorResume(task::rollback)
+                        .thenReturn(task));
 
         StepVerifier.create(taskFlux)
                 .expectNextMatches(task -> task.executedExceptionally.get())
