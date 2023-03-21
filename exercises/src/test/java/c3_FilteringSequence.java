@@ -70,13 +70,13 @@ public class c3_FilteringSequence extends FilteringSequenceBase {
     @Test
     public void watch_out_for_the_spiders() {
         //todo: change code as you need
-        Mono<String> firstResult = Mono.empty();
-        fragile_service();
+        Mono<String> firstResult = fragile_service()
+                .next();
 
         //don't change code below
         StepVerifier.create(firstResult)
-                    .expectNext("watch_out")
-                    .verifyComplete();
+                .expectNext("watch_out")
+                .verifyComplete();
     }
 
     /**
