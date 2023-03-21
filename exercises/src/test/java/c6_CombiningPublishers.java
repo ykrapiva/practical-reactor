@@ -60,12 +60,12 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
     @Test
     public void task_executor() {
         //todo: feel free to change code as you need
-        Flux<Void> tasks = null;
-        taskExecutor();
+        Flux<Mono<Void>> tasksToExecute = taskExecutor();
+        Flux<Void> tasks = tasksToExecute.flatMap(voidMono -> voidMono);
 
         //don't change below this line
         StepVerifier.create(tasks)
-                    .verifyComplete();
+                .verifyComplete();
 
         Assertions.assertEquals(taskCounter.get(), 10);
     }
