@@ -1,4 +1,5 @@
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -11,13 +12,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Often we might require state when working with complex streams. Reactor offers powerful context mechanism to share
  * state between operators, as we can't rely on thread-local variables, because threads are not guaranteed to be the
  * same. In this chapter we will explore usage of Context API.
- *
+ * <p>
  * Read first:
- *
+ * <p>
  * https://projectreactor.io/docs/core/release/reference/#context
- *
+ * <p>
  * Useful documentation:
- *
+ * <p>
  * https://projectreactor.io/docs/core/release/reference/#which-operator
  * https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html
  * https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html
@@ -31,8 +32,10 @@ public class c13_Context extends ContextBase {
      * id to the Reactor context. Your task is to extract the correlation id and attach it to the message object.
      */
     public Mono<Message> messageHandler(String payload) {
-        //todo: do your changes withing this method
-        return Mono.just(new Message("set correlation_id from context here", payload));
+        return Mono.deferContextual(ctx -> {
+            String correlationId = ctx.get(HTTP_CORRELATION_ID);
+            return Mono.just(new Message(correlationId, payload));
+        });
     }
 
     @Test
@@ -42,9 +45,9 @@ public class c13_Context extends ContextBase {
                 .contextWrite(Context.of(HTTP_CORRELATION_ID, "2-j3r9afaf92j-afkaf"));
 
         StepVerifier.create(mono)
-                    .expectNextMatches(m -> m.correlationId.equals("2-j3r9afaf92j-afkaf") && m.payload.equals(
-                            "Hello World!"))
-                    .verifyComplete();
+                .expectNextMatches(m -> m.correlationId.equals("2-j3r9afaf92j-afkaf") && m.payload.equals(
+                        "Hello World!"))
+                .verifyComplete();
     }
 
     /**
@@ -53,19 +56,18 @@ public class c13_Context extends ContextBase {
     @Test
     public void execution_counter() {
         Mono<Void> repeat = Mono.deferContextual(ctx -> {
-            ctx.get(AtomicInteger.class).incrementAndGet();
-            return openConnection();
-        });
-        //todo: change this line only
-        ;
+                    ctx.get(AtomicInteger.class).incrementAndGet();
+                    return openConnection();
+                })
+                .contextWrite(Context.of(AtomicInteger.class, new AtomicInteger()));
 
         StepVerifier.create(repeat.repeat(4))
-                    .thenAwait(Duration.ofSeconds(10))
-                    .expectAccessibleContext()
-                    .assertThat(ctx -> {
-                        assert ctx.get(AtomicInteger.class).get() == 5;
-                    }).then()
-                    .expectComplete().verify();
+                .thenAwait(Duration.ofSeconds(10))
+                .expectAccessibleContext()
+                .assertThat(ctx -> {
+                    assert ctx.get(AtomicInteger.class).get() == 5;
+                }).then()
+                .expectComplete().verify();
     }
 
     /**
@@ -87,8 +89,8 @@ public class c13_Context extends ContextBase {
 
         //don't change this code
         StepVerifier.create(results)
-                    .expectNextCount(90)
-                    .verifyComplete();
+                .expectNextCount(90)
+                .verifyComplete();
 
         Assertions.assertEquals(3, pageWithError.get());
     }
