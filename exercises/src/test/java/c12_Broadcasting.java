@@ -61,8 +61,8 @@ public class c12_Broadcasting extends BroadcastingBase {
     @Test
     public void hot_vs_cold() {
         Flux<String> updates = systemUpdates()
-                //todo: do your changes here
-                ;
+                .publish()
+                .autoConnect();
 
         //subscriber 1
         StepVerifier.create(updates.take(3).doOnNext(n -> System.out.println("subscriber 1 got: " + n)))
@@ -83,8 +83,7 @@ public class c12_Broadcasting extends BroadcastingBase {
     @Test
     public void history_lesson() {
         Flux<String> updates = systemUpdates()
-                //todo: do your changes here
-                ;
+                .cache();
 
         //subscriber 1
         StepVerifier.create(updates.take(3).doOnNext(n -> System.out.println("subscriber 1 got: " + n)))
