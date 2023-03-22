@@ -1,6 +1,7 @@
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
 import reactor.core.publisher.Sinks;
 import reactor.test.StepVerifier;
 
@@ -194,7 +195,12 @@ public class c8_Sinks extends SinksBase {
 
         for (int i = 1; i <= 50; i++) {
             int finalI = i;
-            new Thread(() -> sink.tryEmitNext(finalI)).start();
+            new Thread(() -> sink.emitNext(finalI, new Sinks.EmitFailureHandler() {
+                @Override
+                public boolean onEmitFailure(SignalType signalType, Sinks.EmitResult emitResult) {
+                    return emitResult.equals(Sinks.EmitResult.FAIL_NON_SERIALIZED);
+                }
+            })).start();
         }
 
         //don't change code below
