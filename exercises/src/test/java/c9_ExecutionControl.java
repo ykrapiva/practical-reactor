@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import reactor.blockhound.BlockHound;
 import reactor.core.Exceptions;
 import reactor.core.Scannable;
@@ -48,8 +49,7 @@ public class c9_ExecutionControl extends ExecutionControlBase {
         long threadId = Thread.currentThread().getId();
         Flux<String> notifications = readNotifications()
                 .doOnNext(System.out::println)
-                //todo: change this line only
-                ;
+                .delayElements(Duration.ofSeconds(1));
 
         StepVerifier.create(notifications
                                     .doOnNext(s -> assertThread(threadId)))
